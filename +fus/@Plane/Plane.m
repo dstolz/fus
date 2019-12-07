@@ -1,25 +1,31 @@
-classdef fus
+classdef Plane
     
     
     properties
-        filename char
-        pixelSize (1,:) double {mustBePositive,mustBeFinite}
+        filename      (1,:) char
+        pixelSize     (1,3) double {mustBeNonempty,mustBePositive,mustBeFinite} = [.1 .1 .4];
+        realWordCoord (1,3) double {mustBeNonempty,mustBeFinite} = [0 0 0];
+
+        Condition     (1,:) char
     end
     
     properties (SetAccess = protected)
         Data
-        Manifest
+        Manifest (1,1) fus.Manifest
     end
     
     properties (SetAccess = private)
         originalSize
-        dataModified
+        Fs
     end
     
     properties (Dependent)
         size % lengths of dimensions
-        Time
         dataDimensions
+
+        xVec
+        yVec
+        tVec
     end
     
     properties (SetAccess = private, Transient)
@@ -27,24 +33,37 @@ classdef fus
     end
     
     methods
-        obj = detrend(obj,detrendArgs);
-        
+        obj = detrend(obj,args);
+        obj = normalize(obj,args)
         
         % Constructor
-        function obj = fus(filename)
+        function obj = Plane(filename)
             if nargin >= 1, obj.filename = filename; end
-            
-            obj.Manifest = Manifest;
+            obj.Manifest = obj.Manifest.add('OBJECT','Plane','Plane object created');
         end
         
         
         
         function obj = set.Data(obj,data)
             obj.Data = data;
-            obj.dataModified = now;
+            obj.Manifest = obj.Manifest.add('DATA','set.Data','Data updated');
         end
         
+
+        function v = get.xVec(obj)
+            v = 0:obj.pixelSize(1):(obj.size(1)-1)*obj.pixelSize;
+        end
         
+        function v = get.yVec(obj)
+            v = 0:obj.pixelSize(2):(obj.size(2)-1)*obj.pixelSize;
+        end
+        
+        function v = get.tVec(obj)
+            v = 0:obj.pixelSize(3):(obj.size(3)-1)*obj.pixelSize;
+        end
+        
+
+
         function D = get.dataAs2D(obj)
             D = reshape(obj.Data,prod(obj.size(1:2)),obj.size(3));
         end
@@ -65,19 +84,14 @@ classdef fus
         end
         
         
-        function size = get.size(obj)
-            size = size(obj.Data);
+        function s = get.size(obj)
+            s = size(obj.Data);
         end
         
         
         function obj = set.filename(obj,fn)
             assert(exist(fn,'file') == 2,'File not found: %s',fn)
             obj.filename = fn;
-        end
-        
-        
-        function obj = set.pixelSize(obj,px)
-            assert(length(px) == length(obj.size),
         end
         
         
@@ -101,10 +115,13 @@ classdef fus
             obj.Manifest = obj.Manifest.add('FILE','load',sprintf('Loaded: %s',obj.filename));
             
             obj.Data = squeeze(Acquisition.Data);
-            obj.Noriginal = obj.size;
-            obj.pixelSize = [diff(Acquisition.U(1:2)) diff(Acquisition.W(1:2))];
-            obj.Time = Acquisition.T;
+            obj.originalSize = obj.size;
+            obj.Fs = diff(Acquisition.T(1:2));
             
+            obj.pixelSize = [diff(Acquisition.U(1:2)) ...
+                             diff(Acquisition.W(1:2)) ...
+                             1/obj.Fs];
+
             fprintf(' done\n')
         end
         

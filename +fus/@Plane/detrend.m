@@ -8,3 +8,5 @@ for i = 1:size(D,1)
 end
 
 obj.Data = reshape(D,obj.originalSize);
+
+obj.Manifest.add('MANIPULATION','detrend',varargin);
