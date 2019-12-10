@@ -1,4 +1,4 @@
-classdef Manifest
+classdef Manifest < handle
     
     properties (SetAccess = private)
         Entries (:,1) fus.Entry
@@ -28,6 +28,13 @@ classdef Manifest
         
         function t = get.Types(obj)
             t = unique({obj.Entries.Type});
+        end
+        
+        function t = summary(obj)
+            t = '';
+            for i = 1:length(obj.Entries)
+                t = sprintf('%s%s\n',t,obj.Entries(i).summary);
+            end
         end
 
     end
