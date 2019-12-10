@@ -9,7 +9,7 @@ classdef Plane
         realWordCoord (1,3) double {mustBeNonempty,mustBeFinite} = [0 0 0];
         validPixels   (:,:) logical
         
-        Condition     (1,:) char % defaults to filename
+        Name     (1,:) char % defaults to filename
         
         EventSeries   (:,1) fus.Series
         
@@ -80,7 +80,7 @@ classdef Plane
         function tf = data_is_loaded(obj)
             tf = ~isempty(obj.Data);
             if ~tf
-                warning('No data loaded for %s',obj.Condition)
+                warning('No data loaded for %s',obj.Name)
             end
         end
         
@@ -103,11 +103,11 @@ classdef Plane
             obj.filename = fn;
         end
         
-        function n = get.Condition(obj)
-            if isempty(obj.Condition)
-                [~,obj.Condition] = fileparts(obj.filename);
+        function n = get.Name(obj)
+            if isempty(obj.Name)
+                [~,obj.Name] = fileparts(obj.filename);
             end
-            n = obj.Condition;
+            n = obj.Name;
         end
         
         
@@ -117,7 +117,7 @@ classdef Plane
         % Overloaded functions
         function obj = load(obj)
             
-            fprintf('loading "%s" ...',obj.Condition)
+            fprintf('loading "%s" ...',obj.Name)
             
             load(obj.filename,'Acquisition','-mat')
             
