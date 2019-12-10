@@ -32,6 +32,8 @@ for j = 1:size(D,1)
     D(j,:,:) = y;
 end
 
+D = reshape(D,[size(obj.Data,[1 2])
+
 obj.Manifest.add('EXTERNAL','fus.Plane:getEpochedData', ...
     sprintf('seriesIdx: %d\nSeries: %s\nwindow: %s', ...
     seriesIdx,S.Name,mat2str(window)));

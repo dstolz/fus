@@ -87,7 +87,7 @@ classdef Plane
         
         
         function F = get.dataDimensions(obj)
-            switch length(size(obj.Data))
+            switch ndims(obj.Data)
                 case 2
                     F = 'pixels_time';
                 case 3
