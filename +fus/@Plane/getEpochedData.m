@@ -1,12 +1,15 @@
 function D = getEpochedData(obj,seriesIdx,window)
 % D = getEpochedData(obj,seriesIdx,window)
 %
-% Returns peri-event onset data of size MxNxP, where M is the
-% number of pixels, N is the number of events for seriesIdx,
-% and P is the number of samples in the window.
+% Returns peri-event onset data of size MxNxPxQ, where M and N
+% are the number of pixels in X and Y dimensions of the plane,
+% P is the number of stimuli, and Q is the number of peri-event 
+% samples relative to stimulus onset.
 %
 % Samples from outside the bounds of the data are returned as
 % NaN values.
+
+% TO DO: Add filter by values and value logic
 
 assert(isscalar(seriesIdx) ...
     && seriesIdx >= 1 && seriesIdx <= length(obj.EventSeries), ...
@@ -32,7 +35,10 @@ for j = 1:size(D,1)
     D(j,:,:) = y;
 end
 
-D = reshape(D,[size(obj.Data,[1 2])
+n = size(obj.Data);
+
+% D: x X y X #events X #samples in peri-event onset window
+D = reshape(D,[n(1:2) size(sidx)]);
 
 obj.Manifest.add('EXTERNAL','fus.Plane:getEpochedData', ...
     sprintf('seriesIdx: %d\nSeries: %s\nwindow: %s', ...
