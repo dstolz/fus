@@ -103,11 +103,12 @@ classdef Series < handle
         
         
         function idx = getValueIdx(obj)
-            u = unique(obj.eventValues);
+            v = obj.eventValues;
+            u = unique(v);
             
             idx = cell(size(u));
             for i = 1:length(u)
-                idx{i} = 
+                idx{i} = find(u(i) == v);
             end
         end
         
