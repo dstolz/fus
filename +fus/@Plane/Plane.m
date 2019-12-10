@@ -9,12 +9,13 @@ classdef Plane
         realWordCoord (1,3) double {mustBeNonempty,mustBeFinite} = [0 0 0];
         validPixels   (:,:) logical
         
-        Name     (1,:) char % defaults to filename
+        Mask          (:,:) logical 
+
+        Name          (1,:) char % defaults to filename
         
         EventSeries   (:,1) fus.Series
         
         Fs            (1,1) double = 1;
-        
     end
     
     properties (SetAccess = protected)
@@ -24,11 +25,11 @@ classdef Plane
     
     properties (Access = private)
         originalSize
+        dimOrder
     end
     
     properties (Dependent)
-        dataDimensions
-        
+       
         xVec
         yVec
         tVec
@@ -42,7 +43,8 @@ classdef Plane
     methods
         obj = detrend(obj,args);
         obj = normalize(obj,args);
-        D = getEpochedData(obj,seriesIdx,window);
+        D = get_epoched_data(obj,seriesIdx,window,axDelta);
+        mask = create_mask(obj,threshold)
         
         % Constructor
         function obj = Plane(filename)
@@ -75,6 +77,13 @@ classdef Plane
             n = size(obj.Data);
             D = reshape(obj.Data,n(1)*n(2),n(3));
         end
+
+        function obj = set.Mask(obj,M)
+            n = size(obj.Data);
+            assert(isequal(size(M),n(1:2)),'fus.Plane:set.Mask:Size of a Mask must equal the size of the first 2 dimensions of Data')
+            obj.Mask = M;
+        end
+
         
         
         function tf = data_is_loaded(obj)
@@ -86,7 +95,7 @@ classdef Plane
         
         
         
-        function F = get.dataDimensions(obj)
+        function F = get.dimOrder(obj)
             switch ndims(obj.Data)
                 case 2
                     F = 'pixels_time';
@@ -109,6 +118,11 @@ classdef Plane
             end
             n = obj.Name;
         end
+
+        function s = get_event_series(obj,name)
+            ind = ismember({obj.EventSeries.Name},name);
+            s = obj.EventSeries(ind);
+        end
         
         
         function obj = unload(obj)
@@ -124,12 +138,12 @@ classdef Plane
             
             load(obj.filename,'Acquisition','-mat')
             
-            obj.Data = squeeze(Acquisition.Data);
+            obj.Data = permute(squeeze(Acquisition.Data),[2 1 3]);
             obj.originalSize = size(obj.Data);
             obj.Fs = 1/diff(Acquisition.T(1:2));
             
-            obj.pixelSize = [diff(Acquisition.U(1:2)) ...
-                             diff(Acquisition.W(1:2)) ...
+            obj.pixelSize = [diff(Acquisition.W(1:2)) ...
+                             diff(Acquisition.U(1:2)) ...
                              1/obj.Fs];
             
             % start a new Manifest
