@@ -43,7 +43,7 @@ classdef Plane
     methods
         obj = detrend(obj,args);
         obj = normalize(obj,args);
-        D = get_epoched_data(obj,seriesIdx,window,axDelta);
+        D = get_epoched_data(obj,seriesIdx,window,varargin);
         mask = create_mask(obj,threshold)
         
         % Constructor

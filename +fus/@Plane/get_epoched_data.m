@@ -1,9 +1,9 @@
-function D = get_epoched_data(obj,series,window,asDelta)
-% D = get_epoched_data(obj,series,window,asDelta)
+function D = get_epoched_data(obj,series,window,varargin)
+% D = get_epoched_data(obj,series,window,[asDelta])
 %
 % Returns peri-event onset data of size MxNxPxQ, where M and N
 % are the number of pixels in X and Y dimensions of the plane,
-% P is the number of peri-event samples relative to stimulus onset, 
+% P is the number of peri-event samples relative to stimulus onset,
 % and Q is the number of stimuli.
 %
 % Samples from outside the bounds of the data are returned as
@@ -12,13 +12,20 @@ function D = get_epoched_data(obj,series,window,asDelta)
 % TO DO: Add filter by values and value logic
 
 if isnumeric(series)
-assert(isscalar(series) ...
-    && series >= 1 && series <= length(obj.EventSeries), ...
-    'fus.Plane:get_epoched_data:series must be a scalar integer >= 1 and <= length(fus.Plane.EventSeries)');
+    assert(isscalar(series) ...
+        && series >= 1 && series <= length(obj.EventSeries), ...
+        'fus.Plane:get_epoched_data:series must be a scalar integer >= 1 and <= length(fus.Plane.EventSeries)');
 else
     i = ismember({obj.EventSeries.Name},series);
     assert(any(i),'fus.Plane:get_epoched_data:series must be a scaler integer or name of an EventSeries')
     series = i;
+end
+
+% set defaults
+asDelta = false;
+
+if nargin >= 4
+    asDelta = varargin{1};
 end
 
 S = obj.EventSeries(series);
@@ -27,7 +34,7 @@ S = obj.EventSeries(series);
 sidx = S.get_epochs(window);
 sz = size(sidx);
 
-% D2d: pixels X samples 
+% D2d: pixels X samples
 D2d = obj.data2D;
 
 % D: pixels X samples X events
