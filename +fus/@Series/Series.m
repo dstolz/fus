@@ -79,7 +79,7 @@ classdef Series < handle
         end
         
         function v = get.eventValues(obj)
-            v = {obj.Events.Value};
+            v = [obj.Events.Value];
         end
         
         
@@ -102,7 +102,14 @@ classdef Series < handle
         end
         
         
-        
+        function idx = getValueIdx(obj)
+            u = unique(obj.eventValues);
+            
+            idx = cell(size(u));
+            for i = 1:length(u)
+                idx{i} = 
+            end
+        end
         
         
         
@@ -163,7 +170,7 @@ classdef Series < handle
         
         
         function u = unique(obj)
-            u = unique({obj.Events.Name});
+            u = unique(obj.eventValues);
         end
         
     end
