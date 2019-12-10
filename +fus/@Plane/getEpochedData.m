@@ -43,6 +43,5 @@ D = reshape(D,[n(1:2) size(sidx)]);
 obj.Manifest.add('EXTERNAL','fus.Plane:getEpochedData', ...
     sprintf('seriesIdx: %d\nSeries: %s\nwindow: %s', ...
     seriesIdx,S.Name,mat2str(window)));
-end
 
 
