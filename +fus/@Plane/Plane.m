@@ -111,7 +111,10 @@ classdef Plane
         end
         
         
-        
+        function obj = unload(obj)
+            obj.Data = [];
+            obj.Manifest.add('DATA','fus.Plane:unload','');
+        end
         
         
         % Overloaded functions
