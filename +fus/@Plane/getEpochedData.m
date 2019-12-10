@@ -1,5 +1,5 @@
-function D = getEpochedData(obj,seriesIdx,window)
-% D = getEpochedData(obj,seriesIdx,window)
+function D = getEpochedData(obj,series,window)
+% D = getEpochedData(obj,series,window)
 %
 % Returns peri-event onset data of size MxNxPxQ, where M and N
 % are the number of pixels in X and Y dimensions of the plane,
@@ -11,11 +11,15 @@ function D = getEpochedData(obj,seriesIdx,window)
 
 % TO DO: Add filter by values and value logic
 
-assert(isscalar(seriesIdx) ...
-    && seriesIdx >= 1 && seriesIdx <= length(obj.EventSeries), ...
-    'fus.Plane:getEpochedData:seriesIdx must be a scalar integer >= 1 and <= length(fus.Plane.EventSeries)');
-
-S = obj.EventSeries(seriesIdx);
+if isnumeric(series)
+assert(isscalar(series) ...
+    && series >= 1 && series <= length(obj.EventSeries), ...
+    'fus.Plane:getEpochedData:series must be a scalar integer >= 1 and <= length(fus.Plane.EventSeries)');
+else
+    assert(ismember(series,{obj.EventSeries.Name}),'fus.Plane:getEpochedData:series must be a scaler integer or name of an EventSeries')
+end
+s
+S = obj.EventSeries(series);
 
 sidx = S.getEpochs(window);
 
@@ -41,7 +45,7 @@ n = size(obj.Data);
 D = reshape(D,[n(1:2) size(sidx)]);
 
 obj.Manifest.add('EXTERNAL','fus.Plane:getEpochedData', ...
-    sprintf('seriesIdx: %d\nSeries: %s\nwindow: %s', ...
-    seriesIdx,S.Name,mat2str(window)));
+    sprintf('series: %d\nSeries: %s\nwindow: %s', ...
+    series,S.Name,mat2str(window)));
 
 
