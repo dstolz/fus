@@ -16,12 +16,13 @@ classdef Series < handle
     properties (Dependent)
         Time
         Samples
-        eventOnsets
-        eventOffsets
+        Onsets
+        Offsets
         eventValues
-        eventOnsetsSamples
-        eventOffsetsSamples
+        onsetsIdx
+        offsetsIdx
         N
+        valueIdx
     end
     
     properties (SetAccess = private)
@@ -63,18 +64,18 @@ classdef Series < handle
 
 
         function v = get.Time(obj)
-            v = min(obj.eventOnsets):1/obj.Fs:max(obj.eventOffsets)-1/obj.Fs;
+            v = min(obj.Onsets):1/obj.Fs:max(obj.Offsets)-1/obj.Fs;
         end
 
         function s = get.Samples(obj)
             s = round(obj.Fs*obj.Time);
         end
         
-        function t = get.eventOnsets(obj)
+        function t = get.Onsets(obj)
             t = [obj.Events.Onset];
         end
         
-        function t = get.eventOffsets(obj)
+        function t = get.Offsets(obj)
             t = [obj.Events.Offset];
         end
         
@@ -83,26 +84,31 @@ classdef Series < handle
         end
         
         
-        function s = get.eventOffsetsSamples(obj)
-            s = round(obj.Fs*obj.eventOffsets);
+        function s = get.offsetsIdx(obj)
+            s = round(obj.Fs*obj.Offsets);
         end
         
-        function s = get.eventOnsetsSamples(obj)
-            s = round(obj.Fs*obj.eventOnsets);
+        function s = get.onsetsIdx(obj)
+            s = round(obj.Fs*obj.Onsets);
         end
         
         
-        function e = getEpochs(obj,window)
+        function e = get_epochs(obj,window)
+            % e = get_epochs(obj,window)
+            % 
+            % Returns time X events in samples
+
             narginchk(2,2);
             if isscalar(window), window = [0 window]; end
-            assert(length(window)==2,'fus.Series:getEpochs:window must have 2 values')
+            assert(length(window)==2,'fus.Series:get_epochs:window must have 2 values')
             window = sort(window);
             swin = round(obj.Fs*window);
-            e = obj.eventOnsetsSamples(:)+(swin(1):swin(2));
+            e = obj.onsetsIdx(:)+(swin(1):swin(2));
+            e = e';
         end
         
         
-        function idx = getValueIdx(obj)
+        function idx = get.valueIdx(obj)
             v = obj.eventValues;
             u = unique(v);
             
@@ -142,8 +148,8 @@ classdef Series < handle
             
             obj.ax = ax;
             
-            tOn  = obj.eventOnsets;
-            tOff = obj.eventOffsets;
+            tOn  = obj.Onsets;
+            tOff = obj.Offsets;
             val  = obj.eventValues;
             
             y = ax.YLim;
