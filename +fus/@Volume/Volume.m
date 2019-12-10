@@ -8,7 +8,7 @@ classdef Volume
     end
 
     properties
-        Condition (1,:) char
+        Name (1,:) char
     end
     
     properties (SetAccess = protected)
