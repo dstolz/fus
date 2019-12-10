@@ -16,9 +16,11 @@ assert(isscalar(series) ...
     && series >= 1 && series <= length(obj.EventSeries), ...
     'fus.Plane:getEpochedData:series must be a scalar integer >= 1 and <= length(fus.Plane.EventSeries)');
 else
-    assert(ismember(series,{obj.EventSeries.Name}),'fus.Plane:getEpochedData:series must be a scaler integer or name of an EventSeries')
+    i = ismember({obj.EventSeries.Name},series);
+    assert(any(i),'fus.Plane:getEpochedData:series must be a scaler integer or name of an EventSeries')
+    series = i;
 end
-s
+
 S = obj.EventSeries(series);
 
 sidx = S.getEpochs(window);
