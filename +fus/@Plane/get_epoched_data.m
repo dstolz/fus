@@ -1,5 +1,5 @@
-function D = get_epoched_data(obj,series,window,varargin)
-% D = get_epoched_data(obj,series,window,[asDelta])
+function D = get_epoched_data(obj,series,window)
+% D = get_epoched_data(obj,series,window)
 %
 % Returns peri-event onset data of size MxNxPxQ, where M and N
 % are the number of pixels in X and Y dimensions of the plane,
@@ -8,6 +8,8 @@ function D = get_epoched_data(obj,series,window,varargin)
 %
 % Samples from outside the bounds of the data are returned as
 % NaN values.
+% 
+% See also, fus.Plane.baseline_correct
 
 % TO DO: Add filter by values and value logic
 
@@ -21,12 +23,6 @@ else
     series = i;
 end
 
-% set defaults
-asDelta = false;
-
-if nargin >= 4
-    asDelta = varargin{1};
-end
 
 S = obj.EventSeries(series);
 
@@ -44,21 +40,10 @@ indOoB = sidx < 1 | sidx > size(D2d,2);
 sidx(indOoB) = 1;
 
 
-if asDelta
-    onIdx = S.onsetsIdx;
-    for j = 1:size(D,1)
-        y = reshape(D2d(j,sidx),sz);
-        y(indOoB) = nan;
-        ty = y(sidx < onIdx);
-        ty = reshape(ty,length(ty)/sz(2),sz(2));
-        D(j,:,:) = y - mean(ty,1,'omitnan');
-    end
-else
-    for j = 1:size(D,1)
-        y = reshape(D2d(j,sidx),sz);
-        y(indOoB) = nan;
-        D(j,:,:) = y;
-    end
+for j = 1:size(D,1)
+    y = reshape(D2d(j,sidx),sz);
+    y(indOoB) = nan;
+    D(j,:,:) = y;
 end
 
 

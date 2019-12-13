@@ -16,6 +16,8 @@ classdef Volume
     end
 
     methods
+        S = structural(obj,threshold);
+        
         function obj = Volume(Planes)
             obj.Manifest.add('OBJECT','Volume','Volume object created');
 

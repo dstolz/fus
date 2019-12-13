@@ -16,6 +16,7 @@ classdef Plane
         EventSeries   (:,1) fus.Series
         
         Fs            (1,1) double = 1;
+        
     end
     
     properties (SetAccess = protected)
@@ -34,6 +35,7 @@ classdef Plane
         yVec
         tVec
         
+        dimPosition
     end
     
     properties (SetAccess = private, Transient)
@@ -44,8 +46,9 @@ classdef Plane
         obj = detrend(obj,args);
         obj = normalize(obj,args);
         D = get_epoched_data(obj,seriesIdx,window,varargin);
+        ED = baseline_correct(obj,baselineWindow,responseWindow,seriesName,varargin);
         mask = create_mask(obj,threshold)
-        
+         
         % Constructor
         function obj = Plane(filename)
             if nargin >= 1, obj.filename = filename; end
@@ -88,24 +91,28 @@ classdef Plane
         
         function tf = data_is_loaded(obj)
             tf = ~isempty(obj.Data);
-            if ~tf
-                warning('No data loaded for %s',obj.Name)
-            end
         end
         
         
         
-        function F = get.dimOrder(obj)
+        function d = get.dimOrder(obj)
             switch ndims(obj.Data)
                 case 2
-                    F = 'pixels_time';
+                    d = 'pixels_time';
                 case 3
-                    F = 'x_y_time';
+                    d = 'x_y_time';
                 case 4
-                    F = 'x_y_z_time'; % support using superclass
+                    d = 'x_y_z_time'; % support using volume superclass
             end
         end
         
+        function d = get.dimPosition(obj)
+            c = textscan(obj.dimOrder,'%s','delimiter','_');
+            c = c{1};
+            for i = 1:length(c)
+                d.(c{i}) = i;
+            end
+        end
         
         function obj = set.filename(obj,fn)
             assert(exist(fn,'file') == 2,'fus.Plane:obj = set.filename:File not found: %s',fn)
