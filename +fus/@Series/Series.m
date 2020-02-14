@@ -42,13 +42,13 @@ classdef Series < handle
             if isscalar(durations)
                 durations = repmat(durations,size(onsets));
             end
-            assert(length(onsets)==length(durations),'length(onsets) ~= length(durations)')
+            assert(length(onsets)==length(durations),'fus:Series','length(onsets) ~= length(durations)')
             
 
             if isscalar(values) 
                 values = repmat(values,size(values));
             end
-            assert(length(onsets)==length(values),'length(onsets) ~= length(values)')
+            assert(length(onsets)==length(values),'fus:Series','length(onsets) ~= length(values)')
             
             
             onsets    = onsets(:);
@@ -100,7 +100,7 @@ classdef Series < handle
 
             narginchk(2,2);
             if isscalar(window), window = [0 window]; end
-            assert(length(window)==2,'fus.Series:get_epochs:window must have 2 values')
+            assert(length(window)==2,'fus.Series:get_epochs','window must have 2 values')
             window = sort(window);
             swin = round(obj.Fs*window);
             e = obj.onsetsIdx(:)+(swin(1):swin(2));

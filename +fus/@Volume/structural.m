@@ -1,5 +1,5 @@
-function Y = structural(obj,threshold)
-% Y = structural(obj,threshold)
+function Z = structural(obj,threshold,display)
+% Z = structural(obj,threshold)
 % 
 % Returns a quick easy "structural" which is just a thresholded average
 % across all time samples.
@@ -8,23 +8,29 @@ function Y = structural(obj,threshold)
 % time.
 
 if nargin < 2 || isempty(threshold), threshold = 2; end
+if nargin < 3 || isempty(display), display = true; end
 
-P = obj.Planes;
-S = cell(size(P));
-parfor i = 1:length(P)
-    dil = P(i).data_is_loaded;
-    if ~dil
-        P(i) = load(P(i));
-    end
-    dims = P(i).dimPosition;
-    s = std(P(i).Data,[],dims.time);
-    ind = s < threshold;
-    t = mean(P(i).Data,3,'omitnan');
-    t(ind) = nan;
-    if ~dil
-        P(i) = unload(P(i));
-    end
-    S{i} = t;
-end
+S = arrayfun(@(a) structural(a,threshold,false),obj.Planes,'uni',0);
 n = size(S{1});
-Y = reshape(cell2mat(S'),[n length(S)]);
+Z = reshape(cell2mat(S'),[n length(S)]);
+
+if display
+    figure('color','k')
+    colormap bone
+    nrows = ceil(sqrt(obj.numPlanes));
+    ncols = ceil(obj.numPlanes/nrows);
+    for i = 1:obj.numPlanes
+        x = obj.Planes(1).xVec;
+        y = obj.Planes(1).yVec;
+        subplot(nrows,ncols,i);
+        imagesc(x,y,Z(:,:,i));
+        axis image
+        h = title(obj.Planes(i).Name);
+        h.Color = 'w';
+        h.Interpreter = 'none';
+        set(gca,'xtick',[],'ytick',[]);
+        drawnow
+    end
+end
+
+if nargout == 0, clear Z; end

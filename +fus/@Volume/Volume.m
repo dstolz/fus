@@ -1,4 +1,4 @@
-classdef Volume 
+classdef Volume < handle
     % V = fus.Volume([Planes])
     % 
     % Volume of fus Planes
@@ -15,6 +15,16 @@ classdef Volume
         Manifest (1,1) fus.Manifest
     end
 
+    properties (Dependent)
+        numPlanes
+    end
+
+    properties (Dependent, Hidden)
+        Data3D
+        Data4D
+    end
+    
+    
     methods
         S = structural(obj,threshold);
         
@@ -57,25 +67,33 @@ classdef Volume
 
 
         function obj = load(obj,idx)
-            if nargin == 1, idx = 1:length(obj.Planes); end
+            if nargin == 1, idx = 1:obj.numPlanes; end
             obj.Planes = arrayfun(@load,obj.Planes(idx));
         end
 
-
-        function D = Data(obj)
-
+        function d = get.Data4D(obj)
+            d = cat(4,obj.Planes.Data);
+        end
+        
+        function d = get.Data3D(obj)
+            d = squeeze(nanmean(obj.Data4D,3));
         end
 
+        function n = get.numPlanes(obj)
+            n = numel(obj.Planes);
+        end
+        
 
         % Plane helpers
         function obj = detrend(obj,idx,varargin)
-            if nargin == 1, idx = 1:length(obj.Planes); end
+            if nargin == 1, idx = 1:obj.numPlanes; end
             obj.Planes = arrayfun(@(p) detrend(p,varargin{:}),obj.Planes(idx));
         end
 
         function obj = normalize(obj,idx,varargin)
-            if nargin == 1, idx = 1:length(obj.Planes); end
+            if nargin == 1, idx = 1:obj.numPlanes; end
             obj.Planes = arrayfun(@(p) normalize(p,varargin{:}),obj.Planes(idx));
+            obj.Manifest.add('DATA','normalize',varargin);
         end
     end
 

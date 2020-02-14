@@ -6,7 +6,8 @@ classdef Event < handle
         Onset       (1,1) double = 0;
         Duration    (1,1) double = 1;
         Value       (1,1) double = nan;
-
+        Unit        (1,:) char
+        ScaleFactor (1,1) double = 1;
         Fs          (1,1) double {mustBeNonempty,mustBePositive,mustBeFinite} = 1;
         
         % graphics objects

@@ -3,7 +3,7 @@ function obj = normalize(obj,varargin)
 % 
 % Functions like the standard normalize function
     
-if ~obj.data_is_loaded, return; end
+if ~obj.dataIsLoaded, return; end
 
 obj.Data = normalize(obj.Data,3,varargin{:});
 

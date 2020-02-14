@@ -1,7 +1,7 @@
 function obj = detrend(obj,varargin)
 % objPlane = detrend(objPlane,varargin)
 
-if ~obj.data_is_loaded, return; end
+if ~obj.dataIsLoaded, return; end
 
 D = obj.data2D;
 

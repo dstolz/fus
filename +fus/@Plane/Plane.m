@@ -1,4 +1,4 @@
-classdef Plane
+classdef Plane < handle
     % P = fus.Plane([filename])
     %
     % Handles fus data planes
@@ -36,6 +36,8 @@ classdef Plane
         tVec
         
         dimPosition
+
+        dataIsLoaded
     end
     
     properties (SetAccess = private, Transient)
@@ -83,13 +85,13 @@ classdef Plane
 
         function obj = set.Mask(obj,M)
             n = size(obj.Data);
-            assert(isequal(size(M),n(1:2)),'fus.Plane:set.Mask:Size of a Mask must equal the size of the first 2 dimensions of Data')
+            assert(isequal(size(M),n(1:2)),'fus:Plane:set.Mask','Size of a Mask must equal the size of the first 2 dimensions of Data')
             obj.Mask = M;
         end
 
         
         
-        function tf = data_is_loaded(obj)
+        function tf = get.dataIsLoaded(obj)
             tf = ~isempty(obj.Data);
         end
         
@@ -115,7 +117,7 @@ classdef Plane
         end
         
         function obj = set.filename(obj,fn)
-            assert(exist(fn,'file') == 2,'fus.Plane:obj = set.filename:File not found: %s',fn)
+            assert(exist(fn,'file') == 2,'fus:Plane:set.filename','File not found: %s',fn)
             obj.filename = fn;
         end
         
@@ -143,15 +145,28 @@ classdef Plane
             
             fprintf('loading "%s" ...',obj.Name)
             
-            load(obj.filename,'Acquisition','-mat')
-            
-            obj.Data = permute(squeeze(Acquisition.Data),[2 1 3]);
-            obj.originalSize = size(obj.Data);
-            obj.Fs = 1/diff(Acquisition.T(1:2));
-            
-            obj.pixelSize = [diff(Acquisition.W(1:2)) ...
-                             diff(Acquisition.U(1:2)) ...
-                             1/obj.Fs];
+            [pn,fn,ext] = fileparts(obj.filename);
+            switch lower(ext)
+                case '.mat' % Ali's format for today
+                    load(obj.filename);
+                    
+                    obj.Data = Data.Allframes;
+                    obj.originalSize = size(obj.Data);
+                    obj.Fs = 1/diff(Data.Time(1:2));
+                    
+                    obj.pixelSize = [0.1 0.1 0.3]; % guessing because not included
+                    
+                case '.acq' % Ioconus file format
+                    load(obj.filename,'Acquisition','-mat')
+                    
+                    obj.Data = permute(squeeze(Acquisition.Data),[2 1 3]);
+                    obj.originalSize = size(obj.Data);
+                    obj.Fs = 1/diff(Acquisition.T(1:2));
+                    
+                    obj.pixelSize = [diff(Acquisition.W(1:2)) ...
+                        diff(Acquisition.U(1:2)) ...
+                        1/obj.Fs];
+            end
             
             % start a new Manifest
             obj.Manifest = fus.Manifest;
